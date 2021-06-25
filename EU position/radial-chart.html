@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+	<title> Radial Chart </title>
+	<script src="https://d3js.org/d3.v6.min.js"></script>
+	<style type="text/css">
+
+	</style>
+</head>
+
+<body>
+	<div> 
+	<svg id="placeholder1"; style="width:1600px; height:1500px; border: 1px"></svg>
+	</div>
+	<div> 
+	<svg id="placeholder2"; style="width:600px; height:600px; border: 1px"></svg>
+	</div>
+	<div> 
+	<svg id="placeholder3"; style="width:600px; height:600px; border: 1px"></svg>
+	</div>
+	<div> 
+	<svg id="placeholder4"; style="width:600px; height:600px; border: 1px"></svg>
+	</div>
+
+
+	<script type="text/javascript">
+	// const colors, reusable from light to dark
+	green0 = "#c8f7c5"
+	green1 = "#29f1c3"
+	green2 = "#00e640"
+	blue0 = "#a2ded0"
+	blue1 = "#86e2d5"
+	blue2 = "#4ecdc4"
+	purple0 = "#947cb0"
+	purple1 = "#a96dad"
+	purple2 = "#8c14fc"
+	gray1 = "#ececec"
+	gray0 = "#ecf0f1"
+	gray2 = "#6c7a89"
+
+	// DuBois style
+	// var colorList = d3.scaleOrdinal(d3.schemeCategory10)
+	var colorList = 
+				["#000000",
+				"#654321",
+				"#d2b48c",
+				"#ffd700",
+				"#ffc0cb",
+				"#dc143c",
+				"#00aa00",
+				"#4682b4"
+
+				]
+
+	// init window size
+	windowW = 500
+	windowH = 500
+	margin = {top:30, bottom:50, left:20, right:20}
+	width = windowW - margin.left - margin.right
+	height = windowH - margin.top - margin.bottom
+
+	// init scale, grid
+	// xScale = d3.scaleLinear().domain([0,480]).range([margin.left , margin.left + width])
+	// yScale = d3.scaleLinear().domain([0,480]).range([margin.top , margin.top + height])
+
+	// xGrid = d3.axisTop().scale(xScale).ticks(5).tickValues([50,150,250]).tickSize(-height)//.tickFormat("")
+	// yGrid = d3.axisLeft().scale(yScale).ticks(5).tickValues([50,150,250]).tickSize(-width)//.tickFormat("")
+
+	// dtatsets
+	data = [{year: "1875", value: 21186},
+		  	{year: "1880", value: 498532},
+		  	{year: "1885", value: 736170},
+		  	{year: "1890", value: 1173624},
+		  	{year: "1895", value: 1322694},
+		 	{year: "1899", value: 1434975}
+	]
+	console.log("check data", data)
+
+	scale = d3.scaleLinear().domain([0, d3.max(data, d => d.value) * 1.1]).range([0, 2 * Math.PI])
+
+
+	// level3
+  	var keys = data.map((d, i) => d.year)
+  	console.log("check keys", keys)
+
+	// level2
+  	var arcMinRadius = 40
+  	console.log("check arcMinRadius", arcMinRadius)
+  	var numArcs = keys.length
+  	console.log("check numArcs", numArcs)
+  	var arcPadding = 10
+  	console.log("check arcPadding", arcPadding)
+  	var chartRadius = height/2
+  	console.log("check chartRadius", chartRadius)
+
+  	// level 1
+  	var arcWidth = (chartRadius - arcMinRadius - numArcs * arcPadding) / numArcs
+  	console.log("check arcWidth", arcWidth)
+
+  	function getInnerRadius(index) {
+    return arcMinRadius + (numArcs - (index + 1)) * (arcWidth + arcPadding);
+  	}
+  	console.log("check getInnerRadius1", getInnerRadius(1))
+  	
+	// level0
+	function getOuterRadius(index) {
+    return getInnerRadius(index) + arcWidth;
+  	}
+  	console.log("check getOuterRadius", getOuterRadius(1))
+
+	// init svg
+	var svg = d3.select("#placeholder1")
+				.append("g")
+				.attr("width", width)
+				.attr("height", height)	
+				.attr("transform", "translate(" + width/2 + "," + height/2 + ")")
+
+	// 
+	var radialAxis = svg.append("g")
+						.attr("class", "rAxis")
+						.selectAll("g")
+						.data(data)
+						.enter()
+						.append("g")
+
+	radialAxis.append("circle")
+				.attr("r", (d,i)=> {
+					console.log("check i", [i])
+					return getOuterRadius(i) + arcPadding
+					console.log("check getOuterRadius in circle", getOuterRadius(1))
+					console.log("check getOuterRadius in circle", getOuterRadius(1))
+				})
+				.attr("fill", "white")
+   				.attr("stroke", "black")
+
+	var labelPadding = -5
+	radialAxis.append('text')
+    			.attr('x', labelPadding)
+   				.attr('y', (d, i) => -getOuterRadius(i) + arcPadding)
+    			.text(d => d.year)
+
+	// 
+	var arcs = svg.append("g")
+					.attr("class", "data")
+					.selectAll("path")
+					.data([data])
+					// .data(data)
+					.enter()
+					.append("path")
+					.attr("class", "arc")
+					.style("fill", (d, i) =>colorList[i])
+					//.attr("d","M 100,50, L 200,150, L 300,50 Z")
+
+
+	arc = d3.arc()
+		    .innerRadius((d, i) => getInnerRadius(i))
+		    .outerRadius((d, i) => getOuterRadius(i))
+		    .startAngle(0)
+		    .endAngle((d, i) => scale(d))
+
+	function arcTween(d, i) {
+		console.log('--', d, i)
+	    let interpolate = d3.interpolate(0, d.value);
+	    return t => arc(interpolate(t), i);
+  	}
+	
+  	arcs.transition()
+	    .delay((d, i) => i * 200)
+	    .duration(1000)
+	    .attrTween('d', arcTween)
+
+    // return svg.node()
+
+   
+
+  	
+
+
+
+
+	
+
+
+	</script>
+</body>
+</html>
