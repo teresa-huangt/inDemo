@@ -6,21 +6,28 @@
 	<title> force </title>
 	<script src="https://d3js.org/d3.v6.min.js"></script>
 
-	<script type="module">
+	<!-- load d3.forceSimulation -->
+	<!-- step1 -->
+
+	<!-- <script type="module">
 	import {forceSimulation} from "https://cdn.skypack.dev/d3-force@3";
 	// const simulation = forceSimulation(nodes);
-	</script>
+	</script> -->
+
+
+	<!-- step2 -->
 
 	<script src="https://cdn.jsdelivr.net/npm/d3-dispatch@3"></script>
 	<script src="https://cdn.jsdelivr.net/npm/d3-quadtree@3"></script>
 	<script src="https://cdn.jsdelivr.net/npm/d3-timer@3"></script>
 	<script src="https://cdn.jsdelivr.net/npm/d3-force@3"></script>
-	<script>
+	<!-- <script>
 	// const simulation = d3.forceSimulation(nodes);
-	</script>
+	</script> -->
 
+
+	<!-- CSS -->
 	<style type="text/css">
-
 	</style>
 </head>
 
@@ -55,14 +62,16 @@
 	gray2 = "#6c7a89"
 
 
-	// init window size
+	// init usual size
 	windowW = 500
 	windowH = 500
 	margin = {top:30, bottom:50, left:20, right:20}
 	width = windowW - margin.left - margin.right
 	height = windowH - margin.top - margin.bottom
 
-	// dtatsets
+	var colors = d3.scaleOrdinal(d3.schemeCategory10)
+
+	// data
 	data = [{year: "1875", value: 21186},
 		  	{year: "1880", value: 498532},
 		  	{year: "1885", value: 736170},
@@ -72,15 +81,36 @@
 	]
 	console.log("check data", data)
 
+	// data4forcesimulation
+	var dataNodes = d3.range(6).map(() => ({}))
+	console.log("check nodes", nodes)
+
+	var force = d3.forceSimulation(dataNodes)
+				.force("charge", d3.forceManyBody().strength(-5))
+				.force("center", d3.forceCenter().x(width / 2).y(height / 2))
+
 	// init svg
 	var svg = d3.select("#placeholder1")
 				.append("g")
 				.attr("width", width)
 				.attr("height", height)	
-				.attr("transform", "translate(" + width/2 + "," + height/2 + ")")
 
-	svg.forceSimulation(data).force("x", d3.forceX(0))
-   
+	// create circles
+	var nodes = svg.selectAll("circle")
+					.data(dataNodes)
+					.enter()
+					.append("circle")
+					.attr("r", function(d, i) {return i*3})
+					.style("fill", function(d, i) { return colors(i)})
+
+	//Every time the simulation "ticks", this will be called
+	force.on("tick", function() {	
+		nodes.attr("cx", function(d) { return d.x; })
+			 .attr("cy", function(d) { return d.y; })
+	 })
+
+
+
 
   	
 

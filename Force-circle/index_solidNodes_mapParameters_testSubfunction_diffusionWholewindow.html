@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+	<title> force </title>
+	<script src="https://d3js.org/d3.v6.min.js"></script>
+
+	<!-- load d3.forceSimulation -->
+	<!-- step1 -->
+
+	<!-- <script type="module">
+	import {forceSimulation} from "https://cdn.skypack.dev/d3-force@3";
+	// const simulation = forceSimulation(nodes);
+	</script> -->
+
+
+	<!-- step2 -->
+
+	<script src="https://cdn.jsdelivr.net/npm/d3-dispatch@3"></script>
+	<script src="https://cdn.jsdelivr.net/npm/d3-quadtree@3"></script>
+	<script src="https://cdn.jsdelivr.net/npm/d3-timer@3"></script>
+	<script src="https://cdn.jsdelivr.net/npm/d3-force@3"></script>
+	<!-- <script>
+	// const simulation = d3.forceSimulation(nodes);
+	</script> -->
+
+
+	<!-- CSS -->
+	<style type="text/css">
+	</style>
+</head>
+
+<body>
+	<div> 
+	<svg id="placeholder1"; style="width:1600px; height:1500px; border: 1px"></svg>
+	</div>
+	<div> 
+	<svg id="placeholder2"; style="width:600px; height:600px; border: 1px"></svg>
+	</div>
+	<div> 
+	<svg id="placeholder3"; style="width:600px; height:600px; border: 1px"></svg>
+	</div>
+	<div> 
+	<svg id="placeholder4"; style="width:600px; height:600px; border: 1px"></svg>
+	</div>
+
+
+	<script type="text/javascript">
+	// const colors, reusable from light to dark
+	green0 = "#c8f7c5"
+	green1 = "#29f1c3"
+	green2 = "#00e640"
+	blue0 = "#a2ded0"
+	blue1 = "#86e2d5"
+	blue2 = "#4ecdc4"
+	purple0 = "#947cb0"
+	purple1 = "#a96dad"
+	purple2 = "#8c14fc"
+	gray1 = "#ececec"
+	gray0 = "#ecf0f1"
+	gray2 = "#6c7a89"
+
+
+	// init usual size
+	windowW = 1000
+	windowH = 1000
+	margin = {top:30, bottom:50, left:20, right:20}
+	width = windowW - margin.left - margin.right
+	height = windowH - margin.top - margin.bottom
+
+	var colors = d3.scaleOrdinal(d3.schemeCategory10)
+
+	// data
+	data = {
+				nodes: [
+					{ name: "Adam",gender: 0, age: 1  },
+					{ name: "Bob",gender: 0, age: 2 },
+					{ name: "Carrie",gender: 0, age: 3  },
+					{ name: "Donovan",gender: 0, age: 4 },
+					{ name: "Edward",gender: 1, age: 5  },
+					{ name: "Felicity",gender: 1, age: 5 },
+					{ name: "George",gender: 1, age: 5  },
+					{ name: "Hannah",gender: 0, age: 4 },
+					{ name: "Iris",gender: 0, age: 8 },
+					{ name: "Jerry",gender: 0, age: 9 }
+				],
+				values: [
+					{ gender: 0, age: 1 },
+					{ gender: 0, age: 2 },
+					{ gender: 0, age: 3 },
+					{ gender: 0, age: 4 },
+					{ gender: 1, age: 5 },
+					{ gender: 1, age: 5 },
+					{ gender: 1, age: 5 },
+					{ gender: 0, age: 4 },
+					{ gender: 0, age: 8 },
+					{ gender: 0, age: 9 },
+					{ gender: 1, age: 7 },
+					{ gender: 1, age: 8 },
+					{ gender: 0, age: 9 }
+				]
+			}
+	
+	console.log("check data", data)
+
+	// data4forcesimulation
+
+	// 自定义empty nodes
+	// var dataNodes = d3.range(6).map(() => ({}))
+	// console.log("check nodes", nodes)
+
+	var force = d3.forceSimulation(data.nodes)
+				//strength控制每个圆圈碰撞比下面更明显 //dis等使用时不用force x y
+				.force("charge", d3.forceManyBody().strength(-50).distanceMin(0).distanceMax(800).theta(0))
+				.force("center", d3.forceCenter().x(width / 2).y(height / 2))
+				// forceCollide空着整个最后时刻circleGroup半径，strength控制前一步状态缩放,0的时候只看到一个圆圈，0-1变化不明显当前值很大
+  				.force("collide", d3.forceCollide(100).strength(0.8))//.iteration()
+  				// strength控制纵向扁平圆形or横向扁平圆，两个值互斥
+  				// .force("x", d3.forceX(width / 2).strength(0.2))
+  				// .force("y", d3.forceY(height / 2).strength(0.9))
+
+	// ???
+	// var force1 = d3.forceRadial(20)
+
+	// init svg
+	var svg = d3.select("#placeholder1")
+				.append("g")
+				.attr("width", width)
+				.attr("height", height)	
+
+	// create circles
+	var nodes = svg.selectAll("circle")
+					.data(data.nodes)
+					.enter()
+					.append("circle")
+					.attr("r", function(d, i) {
+						console.log("check d", [d,i])
+						return d.age*3
+					})
+					.style("fill", function(d, i) {
+						if(d.gender==0){
+							return green2
+						}else{
+							return purple2
+						}
+					})
+					.on("mouseover", function(e, d, i) {
+						console.log("check edi",[e,d,i])//i undefinded
+						console.log("check d-name-age-gender", [d.name, d.age, d.gender])
+					})
+
+	//Every time the simulation "ticks", this will be called
+	force.on("tick", function() {	
+		nodes.attr("cx", function(d) { return d.x; })
+			 .attr("cy", function(d) { return d.y; })
+	 })
+
+
+
+
+  	
+
+
+
+
+	
+
+
+	</script>
+</body>
+</html>
