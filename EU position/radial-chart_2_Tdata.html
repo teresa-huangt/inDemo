@@ -42,8 +42,8 @@
 
 	// DuBois style
 	// var colorList = d3.scaleOrdinal(d3.schemeCategory10)
-	var colorList = 
-				["#000000",
+	var colorList = [
+				// "#000000",
 				"#654321",
 				"#d2b48c",
 				"#ffd700",
@@ -51,8 +51,12 @@
 				"#dc143c",
 				"#00aa00",
 				"#4682b4"
-
 				]
+	console.log(colorList)
+	colorList = d3.scaleQuantile().domain([0,41]).range(colorList)
+	// colorList = d3.scaleLinear().domain([0, 41]).range(colorList)
+	console.log("check color map", colorList(0))
+	console.log("check color map", colorList(41))
 
 	// init window size
 	windowW = 500
@@ -61,24 +65,40 @@
 	width = windowW - margin.left - margin.right
 	height = windowH - margin.top - margin.bottom
 
-	// init scale, grid
-	// xScale = d3.scaleLinear().domain([0,480]).range([margin.left , margin.left + width])
-	// yScale = d3.scaleLinear().domain([0,480]).range([margin.top , margin.top + height])
+	// datatsets 模拟
+	// data = [{year: "1875", value: 21186},
+	// 	  	{year: "1880", value: 498532},
+	// 	  	{year: "1885", value: 736170},
+	// 	  	{year: "1890", value: 1173624},
+	// 	  	{year: "1895", value: 1322694},
+	// 	 	{year: "1899", value: 1434975}
+	// ]
 
-	// xGrid = d3.axisTop().scale(xScale).ticks(5).tickValues([50,150,250]).tickSize(-height)//.tickFormat("")
-	// yGrid = d3.axisLeft().scale(yScale).ticks(5).tickValues([50,150,250]).tickSize(-width)//.tickFormat("")
+	// datatsets 真实数据
+	d3.csv("Seats Held by Women in Parliament_changeFormat_2019.csv").then(function(rawdata){
+		// console.log("check rawdata", rawdata)
+		// console.log("check rawdata sub", rawdata[0].Location)
 
-	// dtatsets
-	data = [{year: "1875", value: 21186},
-		  	{year: "1880", value: 498532},
-		  	{year: "1885", value: 736170},
-		  	{year: "1890", value: 1173624},
-		  	{year: "1895", value: 1322694},
-		 	{year: "1899", value: 1434975}
-	]
-	console.log("check data", data)
+		rawdata.forEach(function(d){
+			// console.log("check each rawdata", d)
+			// console.log("check each d.Location", d.Location)
+			// console.log("check each d.Ratio", d.Ratio)
+			d.location = d.Location;
+			d.ratio = +d.Ratio;
+			// d.ratio = d.ratio.sort(d3.descending)
+			// console.log('---- ', d)
+		})
 
-	scale = d3.scaleLinear().domain([0, d3.max(data, d => d.value) * 1.1]).range([0, 2 * Math.PI])
+	console.log("check rawdata", rawdata)
+	data = rawdata
+	console.log('Check data', data)
+	// reoder descending
+	data = data.slice().sort((a,b)=>d3.descending(a.ratio, b.ratio))
+	console.log('Check reorder data', data)
+
+	//
+	// scale = d3.scaleLinear().domain([0, d3.max(data, d => d.ratio) * 1.1]).range([0, 2 * Math.PI])
+	scale = d3.scaleLinear().domain([0, 1]).range([0, 2 * Math.PI])
 
 
 	// level3
@@ -133,7 +153,14 @@
 					console.log("check getOuterRadius in circle", getOuterRadius(1))
 				})
 				.attr("fill", "white")
-   				.attr("stroke", "black")
+				.attr("stroke", function(d,i){
+					if(i==0){
+						return "black"
+					}
+					else{
+						return "white"
+					}
+				})
 
 	var labelPadding = -5
 	radialAxis.append('text')
@@ -150,8 +177,15 @@
 					.enter()
 					.append("path")
 					.attr("class", "arc")
-					.style("fill", (d, i) =>colorList[i])
+					.style("fill", (d, i) =>colorList(i))
+					.style("opacity", (d, i) => 1 - ((i * 7)/42 % 1) * 0.7)
+					// .duration(1000)
 					//.attr("d","M 100,50, L 200,150, L 300,50 Z")
+					.on("mouseover", function(e, d, i){ //i无效
+						console.log("hover value",[d.ratio, d.location])
+					})
+
+
 
 
 	arc = d3.arc()
@@ -161,20 +195,20 @@
 		    .endAngle((d, i) => scale(d))
 
 	function arcTween(d, i) {
-		console.log('--', d, i)
-	    let interpolate = d3.interpolate(0, d.value);
+		// console.log('--', d, i)
+	    let interpolate = d3.interpolate(0, d.ratio);
 	    return t => arc(interpolate(t), i);
   	}
 	
   	arcs.transition()
-	    .delay((d, i) => i * 200)
-	    .duration(1000)
+	    .delay((d, i) => i * 60)
+	    .duration(500)
 	    .attrTween('d', arcTween)
 
     // return svg.node()
 
    
-
+})
   	
 
 

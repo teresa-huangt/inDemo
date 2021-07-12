@@ -61,13 +61,6 @@
 	width = windowW - margin.left - margin.right
 	height = windowH - margin.top - margin.bottom
 
-	// init scale, grid
-	// xScale = d3.scaleLinear().domain([0,480]).range([margin.left , margin.left + width])
-	// yScale = d3.scaleLinear().domain([0,480]).range([margin.top , margin.top + height])
-
-	// xGrid = d3.axisTop().scale(xScale).ticks(5).tickValues([50,150,250]).tickSize(-height)//.tickFormat("")
-	// yGrid = d3.axisLeft().scale(yScale).ticks(5).tickValues([50,150,250]).tickSize(-width)//.tickFormat("")
-
 	// dtatsets
 	data = [{year: "1875", value: 21186},
 		  	{year: "1880", value: 498532},
@@ -133,7 +126,14 @@
 					console.log("check getOuterRadius in circle", getOuterRadius(1))
 				})
 				.attr("fill", "white")
-   				.attr("stroke", "black")
+				.attr("stroke", function(d,i){
+					if(i==0){
+						return "black"
+					}
+					else{
+						return "white"
+					}
+				})
 
 	var labelPadding = -5
 	radialAxis.append('text')

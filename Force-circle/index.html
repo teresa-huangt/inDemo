@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+	<title> force </title>
+	<script src="https://d3js.org/d3.v6.min.js"></script>
+
+	<script type="module">
+	import {forceSimulation} from "https://cdn.skypack.dev/d3-force@3";
+	// const simulation = forceSimulation(nodes);
+	</script>
+
+	<script src="https://cdn.jsdelivr.net/npm/d3-dispatch@3"></script>
+	<script src="https://cdn.jsdelivr.net/npm/d3-quadtree@3"></script>
+	<script src="https://cdn.jsdelivr.net/npm/d3-timer@3"></script>
+	<script src="https://cdn.jsdelivr.net/npm/d3-force@3"></script>
+	<script>
+	// const simulation = d3.forceSimulation(nodes);
+	</script>
+
+	<style type="text/css">
+
+	</style>
+</head>
+
+<body>
+	<div> 
+	<svg id="placeholder1"; style="width:1600px; height:1500px; border: 1px"></svg>
+	</div>
+	<div> 
+	<svg id="placeholder2"; style="width:600px; height:600px; border: 1px"></svg>
+	</div>
+	<div> 
+	<svg id="placeholder3"; style="width:600px; height:600px; border: 1px"></svg>
+	</div>
+	<div> 
+	<svg id="placeholder4"; style="width:600px; height:600px; border: 1px"></svg>
+	</div>
+
+
+	<script type="text/javascript">
+	// const colors, reusable from light to dark
+	green0 = "#c8f7c5"
+	green1 = "#29f1c3"
+	green2 = "#00e640"
+	blue0 = "#a2ded0"
+	blue1 = "#86e2d5"
+	blue2 = "#4ecdc4"
+	purple0 = "#947cb0"
+	purple1 = "#a96dad"
+	purple2 = "#8c14fc"
+	gray1 = "#ececec"
+	gray0 = "#ecf0f1"
+	gray2 = "#6c7a89"
+
+
+	// init window size
+	windowW = 500
+	windowH = 500
+	margin = {top:30, bottom:50, left:20, right:20}
+	width = windowW - margin.left - margin.right
+	height = windowH - margin.top - margin.bottom
+
+	// dtatsets
+	data = [{year: "1875", value: 21186},
+		  	{year: "1880", value: 498532},
+		  	{year: "1885", value: 736170},
+		  	{year: "1890", value: 1173624},
+		  	{year: "1895", value: 1322694},
+		 	{year: "1899", value: 1434975}
+	]
+	console.log("check data", data)
+
+	// init svg
+	var svg = d3.select("#placeholder1")
+				.append("g")
+				.attr("width", width)
+				.attr("height", height)	
+				.attr("transform", "translate(" + width/2 + "," + height/2 + ")")
+
+	svg.forceSimulation(data).force("x", d3.forceX(0))
+   
+
+  	
+
+
+
+
+	
+
+
+	</script>
+</body>
+</html>
