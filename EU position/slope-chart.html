@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title> Slope Chart </title>
+	<script src="https://d3js.org/d3.v6.min.js"></script>
+	<style type="text/css">
+		svg{ 
+			background-color: #e4d2c1;
+		}
+		.placeholder1{
+			padding: 80px;
+		}
+
+		.withinSVG{
+			padding: 80px;
+		}
+	</style>
+</head>
+
+<body>
+	<div> 
+		<h1 id="title">Welcome</h1>
+		<svg id="placeholder1"; style="width:600px; height:600px; padding: 80px"></svg>
+	</div>
+	<div> 
+		<svg id="placeholder2"; style="width:600px; height:600px; border: 1px"></svg>
+	</div>
+
+	<script type="text/javascript">
+
+	// Const colors, reusable from light to dark
+	green0 = "#c8f7c5"
+	green1 = "#29f1c3"
+	green2 = "#00e640"
+	blue0 = "#a2ded0"
+	blue1 = "#86e2d5"
+	blue2 = "#4ecdc4"
+	purple0 = "#947cb0"
+	purple1 = "#a96dad"
+	purple2 = "#8c14fc"
+	gray1 = "#ececec"
+	gray0 = "#ecf0f1"
+	gray2 = "#6c7a89"
+
+	// DuBois style color
+	// all color
+	var colorList = [
+				// "#000000",
+				"#654321",
+				"#d2b48c",
+				"#ffd700",
+				"#ffc0cb",
+				"#dc143c",
+				"#00aa00",
+				"#4682b4"
+				]
+	// dubois radial bar color; different with above all color
+	var colorList = [
+				"#eaafa6", 
+				"#9da0b0", 
+				"#c4a58f", 
+				"#ecb025", 
+				"#d8c7b3", 
+				"#dc354a"
+				]
+
+	// Init window size
+	windowW = 600
+	windowH = 600
+	margin = {top:30, bottom:50, left:20, right:20}
+	width = windowW - margin.left - margin.right
+	height = windowH - margin.top - margin.bottom
+
+	var xlabelPadding = -10
+	var ylabelPadding = 5
+
+	// True data
+
+
+
+	// Simulate data
+	data = [
+		{location:"a",ratios:[0.2, 0.3]},
+		{location:"b",ratios:[0.2, 0.4]},
+		{location:"d",ratios:[0.2, 0.5]},
+		{location:"e",ratios:[0.2, 0.48]},
+		{location:"f",ratios:[0.3, 0.2]},
+		{location:"g",ratios:[0.4, 0.4]},
+	]
+	console.log("check data", data)
+	console.log("check data one", data[1])
+	console.log("check data one", data[1].location)
+
+
+	// scale dataset
+	dataLength = data.length
+	colorList = d3.scaleQuantile().domain([0,dataLength]).range(colorList)
+
+	
+	// Init svg
+	var svg = d3.select("#placeholder1")
+				.append("g")
+				.attr("width", width)
+				.attr("height", height)	
+				// .attr("transform", "translate(" + width/2 + "," + height/1.2 + ")")
+
+	// params
+	var params = {
+		svg:{
+			width:  954, 
+			height: 768
+		},
+		margin:{ 
+			top:    72,
+			right:  24,
+			bottom: 72,
+			left:   24
+		},
+		padding:{
+			top:    4,
+			right:  12,
+			bottom: 4,
+			left:   12
+		},
+	}
+	console.log("check params structure", params.padding.top);
+
+	// fundamental parameters
+
+	yLog = d3.scaleLog()
+		    .domain(d3.extent(data.flatMap(d => d.ratios)))
+		    .range([0, width])
+    console.log("check ylog----------", yLog(0.3))
+
+
+    data.columns = ["5 July 2020", "25 July 2020"]
+
+    n = data.columns.length
+
+	lineLog = d3.line()
+			    .x((d, i) => xScale(i))
+			    .y(yLog)
+
+     xScale = d3.scalePoint()
+	    .domain(d3.range(n))
+	    .range([0, height])
+	    .padding(0.5)
+    console.log("check xScale(0)", xScale(0))
+
+    // y = d3.scaleLinear()
+	   //  .domain(d3.extent(rankedData.flatMap(d => d.visitsRanked)))
+	   //  .range([params.margin.top, params.svg.height - params.margin.bottom])
+
+    // draw line
+	 svg.append("g")
+	    .attr("fill", "none")
+	    .attr("stroke", "black")
+	    .selectAll("path")
+	    .data(data)
+	    .join("path")
+	    .attr("stroke", "black")
+	    .attr("d", d => lineLog(d.ratios));
+
+    // draw circle
+    svg.append("g")
+	    .selectAll("g")
+	    .data(data)
+	    .join("g")
+	      .append("circle")
+	        .attr("fill", "#9885D5")
+	        .attr("cx", d => {
+	        	console.log("check data", data)
+	        	return xScale(0)
+	        })
+	        .attr("cy", d => yLog(d.ratios[0]))
+	        .attr("r", 4)
+	        .clone(true)
+	          .attr("fill", "#4EA376")
+	          .attr("cx", d => xScale(1))
+	          .attr("cy", d => yLog(d.ratios[1]));
+
+
+  	// draw label 
+  	svg.append("g")
+	    .selectAll("g")
+	    .data(data)
+	    .join("g")
+	      .append("text")
+	        .attr("fill", "black")
+	        .attr("text-anchor", "end")
+	        // .attr("text-anchor", (d, i) => i === 0 ? "end" : i === n - 1 ? "start" : "middle")
+	        .attr("x", d => {
+	        	console.log("check data", data)
+	        	return xScale(0)
+	        })
+	        .attr("y", d => yLog(d.ratios[0]) + 15)
+	        .text((d,i)=>{
+	        	console.log("check d", d)
+	        	console.log("check i", i)
+	        	console.log("check d,location", d.location)
+	        	return d.location + "-" + d.ratios[0]
+	        })
+	        .clone(true)
+	          .attr("fill", "blue")
+	          .attr("text-anchor", "start")
+	          .attr("x", d => xScale(1))
+	          .attr("y", d => yLog(d.ratios[1]) + 15)
+	          .text(d =>{
+	          	return d.location + "-" + d.ratios[1]
+	          })
+
+
+
+
+
+	//
+
+
+
+
+// })
+  	
+
+	</script>
+</body>
+</html>
